@@ -72,4 +72,4 @@ td button { padding:0; border:0; background:none; color:#315b61; font:inherit; t
 tr.current { background:#eef2f2; }
 .methods-note summary { margin-bottom:.8rem; }
 .methods-note p { margin-top:.7rem; }
-@media(max-width:540px){.control-grid{grid-template-columns:1fr;} .panel{padding:.9rem .7rem;} .pagination{gap:.3rem;} .metric-row{gap:1rem;} .metric-desc{font-size:.74rem;} .table-wrap{margin:0 -.3rem;} table{font-size:.69rem;} th,td{padding:.5rem .25rem;} }
+@media(max-width:540px){.control-grid{grid-template-columns:1fr;} .panel{padding:.9rem .7rem;} .pagination{gap:.3rem;} .metric-row{gap:1rem;} .metric-desc{font-size:.74rem;} .table-wrap{margin:0 -.3rem;} table{font-size:.69rem;} th,td{padding:.5rem .25rem;} .viz text{font-size:18px;} .viz>text:last-child{font-size:16px;} }
