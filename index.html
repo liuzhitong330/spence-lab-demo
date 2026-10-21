@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An exploratory, reproducible view of uncertainty in gene-level loss-of-function effects at GWAS regions, using Spence Lab public data.">
+  <title>Exploratory Analyses Inspired by the Spence Lab</title>
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <main class="page">
+    <h1>Exploratory Analyses Inspired by the Spence Lab</h1>
+    <div class="byline">
+      Cathy Liu · Computational biology · <a href="mailto:cathyliu014@gmail.com">cathyliu014@gmail.com</a><br>
+      Prepared for the Spence Lab, UCSF<br>
+      Personal exploratory project, October 2026
+    </div>
+    <nav class="section-nav" aria-label="Demo sections">
+      <a href="#motivation">The question</a><a href="#a1">Gene effects</a><a href="#a2">Across regions</a><a href="#relevance">Next steps</a>
+    </nav>
+    <p>A strong GWAS signal and a weak loss-of-function result need not disagree. The Spence Lab studies why these tests reveal different aspects of a trait. But what can a weak result actually rule out?</p>
+    <p>I built a way to separate tightly bounded gene effects from effects that remain uncertain. Explore the lab’s public estimates, change the effect size you care about, and see which follow-up questions the evidence can support.</p>
+
+    <hr id="motivation">
+    <section aria-labelledby="how-heading">
+      <h2 id="how-heading">How it works</h2>
+      <p>Each line below is an uncertainty interval for a gene’s estimated loss-of-function burden effect. The shaded band is a range you choose around zero. A line inside that band tells a different story from a line that extends far beyond it, even when neither estimate is significant.</p>
+      <p class="methods-note">These are public UK Biobank summary estimates deposited with <a href="https://www.nature.com/articles/s41586-025-09703-7">Specificity, length and luck drive gene rankings in association studies</a>. Effects use inverse-rank-normalized trait units, not clinical units. A gene’s presence in a GWAS region does not make it causal.</p>
+    </section>
+
+    <hr id="a1">
+    <section aria-labelledby="analysis-one-heading">
+      <h2 id="analysis-one-heading">Analysis 1 — What does this region leave unresolved?</h2>
+      <div class="experiment">
+        <div class="exp-label">Question</div>
+        <div class="exp-title">A small estimate is not always a precise estimate.</div>
+        <p>Choose a trait and region. Move the threshold to ask whether the interval bounds a small effect, supports a larger one, or leaves the question open.</p>
+      </div>
+      <div class="panel">
+        <div class="control-grid">
+          <label>Trait<select id="trait-select"></select></label>
+          <label>GWAS region<select id="locus-select"></select></label>
+        </div>
+        <label class="slider-label" for="effect-threshold">Effect range around zero: <strong id="threshold-label">±0.10</strong></label>
+        <input id="effect-threshold" type="range" min="0.02" max="0.5" step="0.01" value="0.1">
+        <details class="assumptions">
+          <summary>Interval assumptions</summary>
+          <label>Interval<select id="interval-mode"><option value="pointwise">95% pointwise</option><option value="family">95% Bonferroni, all assayed genes</option></select></label>
+          <p id="interval-note"></p>
+          <p>These normal-approximation intervals are descriptive. Rare-carrier estimates may depart from this approximation. A threshold is a sensitivity choice, not a validated biological cutoff or a formal equivalence test.</p>
+        </details>
+        <p id="scope-note" class="scope-note"></p>
+        <div class="chips" id="guided-examples"><span>Try:</span><button type="button" data-example="SORT1">SORT1 / LDL</button><button type="button" data-example="PCSK9">PCSK9 / LDL</button><button type="button" data-example="HHIP">HHIP / height</button></div>
+        <label class="gene-label">Inspect a gene<select id="gene-select"></select></label>
+        <svg id="hero-viz" class="viz" viewBox="0 0 600 310" role="img" aria-label="Gene effect estimates with uncertainty intervals and a shaded threshold band"></svg>
+        <div class="pagination"><button id="previous-page" type="button">Previous genes</button><span id="page-label"></span><button id="next-page" type="button">Next genes</button></div>
+        <div class="readout" id="readout" aria-live="polite"></div>
+        <figcaption id="figure-caption"></figcaption>
+      </div>
+      <div class="metric-row">
+        <div class="metric"><span class="metric-val" id="metric-one">—</span><span class="metric-desc">within the range</span></div>
+        <div class="metric"><span class="metric-val" id="metric-two">—</span><span class="metric-desc">entirely beyond it</span></div>
+        <div class="metric"><span class="metric-val" id="metric-three">—</span><span class="metric-desc">unresolved</span></div>
+      </div>
+      <p id="missing-note" class="scope-note"></p>
+      <p><strong>What this lets the lab do:</strong> distinguish imprecision from a tightly bounded effect before treating GWAS–burden disagreement as a biological clue.</p>
+      <p><strong>Where I could add value:</strong> make the assumptions, missing estimates and sensitivity of that distinction inspectable, with an export that can be taken back to a research pipeline.</p>
+      <button class="text-button" id="download-locus" type="button">Download this region’s gene estimates (CSV)</button>
+    </section>
+
+    <hr id="a2">
+    <section aria-labelledby="analysis-two-heading">
+      <h2 id="analysis-two-heading">Analysis 2 — Where is precision the bottleneck?</h2>
+      <div class="experiment"><div class="exp-label">Comparison</div><div class="exp-title">The same question, across leading GWAS regions.</div></div>
+      <p>Counts below use the same threshold and interval choice. Regions remain in GWAS significance order; this is not a new causal-gene ranking. Click a region to inspect every annotated gene within it.</p>
+      <div class="panel">
+        <label class="count-label">Show<select id="region-count"><option value="10">Top 10 regions</option><option value="20" selected>Top 20 regions</option><option value="50">Top 50 regions</option></select></label>
+        <div class="table-wrap"><table><caption class="sr-only">Gene interval classifications by GWAS region</caption><thead><tr><th scope="col">Region</th><th scope="col">Within</th><th scope="col">Beyond</th><th scope="col">Unresolved</th><th scope="col">No estimate</th></tr></thead><tbody id="region-table"></tbody></table></div>
+        <p class="scope-note" id="cohort-note"></p>
+      </div>
+      <button class="text-button" id="download-summary" type="button">Download the current comparison (CSV)</button>
+    </section>
+
+    <hr id="relevance">
+    <section aria-labelledby="relevance-heading">
+      <h2 id="relevance-heading">Why this matters for the lab</h2>
+      <p>The paper explains why GWAS and loss-of-function rankings need not identify the same genes. This companion analysis asks a narrower follow-up: when is an apparently weak burden result sufficiently precise to make that contrast worth investigating?</p>
+      <p>A wide interval points first toward carrier counts, variant annotation and independent replication. A tightly bounded effect at a strong GWAS region motivates fine-mapping and colocalization before comparing context-specific regulation with gene-level dosage. Neither path follows from proximity alone, and a small burden effect does not imply that a gene is unimportant.</p>
+
+      <h2>What I would bring</h2>
+      <p>My pancreatic cancer work connected computational analysis to biological questions. I would like to bring that habit to genetic data: start with an explicit question, check how the inputs and assumptions affect the answer, and make the result easy for others to examine and build on.</p>
+      <p class="methods-note">This is an assistant-supported exploratory project. Its reproducible analysis and tests demonstrate a proposed way of working, not prior independent experience developing population-genetics methods.</p>
+
+      <h2>Methods note</h2>
+      <p class="methods-note">For effect estimate β and standard error SE, the interval is β ± z × SE. “Within” means the whole interval lies in [−δ, δ]; “beyond” means the whole interval lies above δ or below −δ; all other valid intervals are “unresolved.” Missing or ambiguous gene mappings are not classified. No genes are filtered by burden significance.</p>
+      <details class="methods-note"><summary>Sources, coverage and limitations</summary>
+        <p id="provenance-note"></p>
+        <p>These are selected leading GWAS regions, not a representative set of all genes. The displayed gene–region entries are not independent samples. The analysis does not identify causal genes, estimate clinical risk, establish equivalence or reproduce the paper’s complete pipeline.</p>
+        <p>Source code and estimates: <a href="https://github.com/jeffspence/specificity_length_luck/tree/d85655034c18c2901913132aa90f1fd774c887ab">author repository, pinned revision</a>. Lab context: <a href="https://jeffspence.github.io/research/">Spence Lab research</a>. Rebuild instructions and checks: <a href="https://github.com/liuzhitong330/spence-lab-demo">this project’s repository</a>. <a href="data.json">Download all derived data</a>.</p>
+      </details>
+    </section>
+    <footer>Cathy Liu · <a href="mailto:cathyliu014@gmail.com">cathyliu014@gmail.com</a> · <a href="tel:+14152163799">415-216-3799</a><br>
+      Epilepsy neurostimulation project, <a href="https://arxiv.org/abs/2606.04339">arXiv:2606.04339</a></footer>
+  </main>
+  <script src="data.js?v=1"></script><script src="app.js?v=1"></script>
+</body>
+</html>
